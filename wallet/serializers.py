@@ -87,8 +87,8 @@ class IncomeInWalletSerializer(serializers.BaseSerializer):
         income = instance.income
 
         return{
-            "jarName": instance.wallet.name,
-            "jarId": instance.wallet.id,
+            "walletName": instance.wallet.name,
+            "walletId": instance.wallet.id,
             "incomeId": income.id,
             "incomeName": income.name,
             "incomeDescription": income.description

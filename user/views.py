@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from user.serializers import CreateUserSerializer, EmailSerializer
+from user.serializers import CreateUserSerializer, EmailSerializer,RecoverPasswordSerializer
 from django.db import transaction, utils
 from rest_framework import generics, permissions, status, exceptions
 from rest_framework.response import Response
-from shared.utils import response_data, get_user_by_email, send_mail, age
+from shared.utils import response_data, get_user_by_email, send_mail, age, generate_user_token
 from user.models import UserToken
 from jars.models import JarChoice, Jar
 from django.utils import timezone
@@ -33,16 +33,16 @@ class CreateUserView(generics.CreateAPIView):
         
         email_data = { 'subject': subject, 'body': body, 'to_email': to_email }
 
-        # try:
-        #     # send_mail(email_data)
-        # except exceptions.APIException as e:
-        #     response = response_data(
-        #         success = False,
-        #         statusCode = status.HTTP_503_SERVICE_UNAVAILABLE,
-        #         message = 'Error while sending email',
-        #         data = e.detail
-        #     )
-        #     return Response(response, response.get('statusCode'))
+        try:
+            send_mail(email_data)
+        except exceptions.APIException as e:
+            response = response_data(
+                success = False,
+                statusCode = status.HTTP_503_SERVICE_UNAVAILABLE,
+                message = 'Error while sending email',
+                data = e.detail
+            )
+            return Response(response, response.get('statusCode'))
                 
         response = response_data(
             success = True,
@@ -173,4 +173,86 @@ class VerifyEmailView(generics.UpdateAPIView):
         
         return Response(response, status = response.get('statusCode'))
 
+class CheckEmailForgotPassword(generics.UpdateAPIView):
+    permission_classes = [permissions.AllowAny]
     
+    def put(self, request, *args, **kwargs):
+        user = get_user_by_email(request.data.get('email'))
+        if user is None:
+            raise exceptions.NotFound()
+        user_token = UserToken.objects.filter(user = user, isVerified = False).order_by('-createdAt').first()
+        current = timezone.now()
+        # If token is not expired, return it else create new ones
+        if user_token and user_token.expiredAt > current:
+            token = user_token.verifyCode
+        else:
+            token = generate_user_token(user)
+        email_data = {}
+        email_data['subject']= "Reset Password"
+        email_data['body'] = f"Your verify code is {token}"
+        email_data['to_email'] = user.email
+        send_mail(email_data)
+        response = response_data(
+            success = True,
+            statusCode = status.HTTP_200_OK,
+            message = "Your email is existed",
+            data = {
+                'email': user.email,
+                'expiredAt': token.expiredAt if not user_token else user_token.expiredAt
+            }
+        )
+        return Response(response, status = response.get('statusCode'))
+
+class RecoverPassword(generics.UpdateAPIView):
+    serializer_class = RecoverPasswordSerializer
+    permission_classes = [permissions.AllowAny]
+    def update(self, request, *args, **kwargs):
+        user_from_db = get_user_by_email(request.data.get('email'))
+        if user_from_db is None:
+            raise exceptions.NotFound()
+        serializer = self.get_serializer(data=request.data, context = { 'request': request })
+        serializer.is_valid(raise_exception = True)
+        serializer.update(user_from_db, serializer.validated_data)
+        response = response_data(
+            success = True,
+            statusCode = status.HTTP_200_OK,
+            message = f'Recover password of email {user_from_db.email} successfully'
+        )
+        return Response(response, status = response.get('statusCode'))
+
+class VerifyCodeForRetrivePasswordView(generics.UpdateAPIView):
+    permission_classes = [permissions.AllowAny]
+    def put(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        user = get_user_by_email(request.data['email'])
+        if user is None:
+            raise exceptions.NotFound()
+        user_token = UserToken.objects.filter(user = user).order_by('-id').first()
+        # if user_token is None:
+        #     return Response(data = 'Not found user', status = status.HTTP_404_NOT_FOUND)
+
+        current = timezone.now()
+        
+        if user_token.isVerified:
+            return Response(
+                response_data(
+                    success = True,
+                    statusCode = status.HTTP_202_ACCEPTED,
+                    message = 'Your account has been verified before'
+                )
+            )
+        response = response_data(
+            success = True
+        )
+        if user_token.expiredAt > current and user_token.verifyCode == request.data.get('verifyCode', ''):
+            user.is_active = True
+            user_token.isVerified = True
+            user.save(update_fields = ['is_active'])
+            user_token.save(update_fields = ['isVerified'])
+            response['statusCode'] = status.HTTP_202_ACCEPTED
+            response['message'] = 'Verified successfully'
+        else:
+            response['statusCode'] = status.HTTP_400_BAD_REQUEST
+            response['message'] = 'The code is not matched or expired'
+        
+        return Response(response, status = response.get('statusCode'))

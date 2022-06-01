@@ -5,6 +5,7 @@ import uuid
 import os
 from shared.utils import generate_user_token, get_user_by_email, generate_verify_code
 from django.utils import timezone
+from django.contrib.auth.password_validation import validate_password
 class CreateUserSerializer(serializers.ModelSerializer):
     
     password2 = serializers.CharField(write_only = True)
@@ -130,3 +131,31 @@ class EmailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [ 'newEmail' ]
+
+class RecoverPasswordSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only = True, 
+        required = True, 
+        validators = [
+            validate_password
+        ]
+    )
+    password2 = serializers.CharField(write_only = True, required = True)
+    def validate(self, attrs):
+        if attrs['password'] != attrs['password2']:
+            errors = {}
+            errors['password'] = ('Password fields did not match', )
+            raise serializers.ValidationError(errors)
+
+        return attrs
+    
+    def update(self, instance, validated_data):
+
+        instance.set_password(validated_data['password'])
+        instance.save(update_fields = ['password'])
+
+        return instance
+    
+    class Meta:
+        model = User
+        fields = ['password', 'password2']

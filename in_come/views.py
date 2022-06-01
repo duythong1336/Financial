@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from in_come.models import Income
 from shared.utils import response_data
 from shared.messages import ResponseMessage
-from in_come.serializers import CreateIncomeSerializer,ListIncomeSerializer
+from in_come.serializers import CreateIncomeSerializer,ListIncomeSerializer,AddIncomeToWalletSerializer
 # Create your views here.
 class CreateAndListIncomeView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
@@ -28,7 +28,11 @@ class CreateAndListIncomeView(generics.ListCreateAPIView):
         return Response(response, status=response.get('statusCode'))
 
     def list(self, request, *args, **kwargs):
+        from django.db.models import Q
+        query = Q()
+        
         queryset = Income.objects.filter(user = request.user)
+
         if len(queryset) > 0:
             serializer = ListIncomeSerializer(queryset, many = True)
             response = response_data(
@@ -108,3 +112,24 @@ class GetlistIncomeEnableAddtoWallet(generics.ListAPIView):
             )
         return Response(response, status= response.get('statusCode'))
 
+class CreateIncomeAndAddToWallet(generics.CreateAPIView):
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        serializer = AddIncomeToWalletSerializer(data = data, context = {'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            response = response_data(
+                success = True,
+                statusCode=status.HTTP_201_CREATED,
+                message = ResponseMessage.CREATE_SUCCESS_MESSAGE,
+                data = serializer.data
+            )
+        else:
+            response = response_data(
+                success = True,
+                statusCode=status.HTTP_400_BAD_REQUEST,
+                message = ResponseMessage.CREATE_SUCCESS_MESSAGE,
+                data = serializer.erros
+            )
+
+        return Response(response, status = response.get('statusCode'))

@@ -1,5 +1,5 @@
 # pull official base image
-FROM public.ecr.aws/docker/library/python:3.9
+FROM python:3.10
 
 # RUN apt-get update \
 #     && apt-get -y install libpq-dev gcc \
@@ -54,4 +54,4 @@ COPY . .
 EXPOSE 80
 
 # run entrypoint.sh
-ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
+ENTRYPOINT ["sh","/usr/src/app/entrypoint.sh"]

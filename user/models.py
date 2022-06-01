@@ -57,7 +57,7 @@ class User(AbstractUser, BaseModel, SoftDeleteModel):
 
     def __str__(self):
         return self.email
-class UserToken(SoftDeleteModel):
+class UserToken(SoftDeleteModel, BaseModel):
     user = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'tokens')
     verifyCode = models.CharField(
         max_length = 6,
