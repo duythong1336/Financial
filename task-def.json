@@ -17,7 +17,7 @@
                     "containerPort": "80",
                     "protocol": "tcp"
                 }
-            ]
+            ],
             "secrets": null,
             "mountPoints": null,
             "volumesFrom": null,
