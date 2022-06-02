@@ -2,7 +2,7 @@
   "executionRoleArn": "arn:aws:iam::198057700007:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
-      "name": "topjob-container",
+      "name": "financial-container",
       "image": "198057700007.dkr.ecr.ap-southeast-1.amazonaws.com/service.financial:latest",
       "essential": true,
       "portMappings": [
