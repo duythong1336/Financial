@@ -94,7 +94,7 @@ DATABASES = {
         'NAME': 'financial',
         'USER': 'admin',
         'PASSWORD': '21112000a',
-        'HOST': 'topjob-db.ckmu3sjqklp5.ap-southeast-1.rds.amazonaws.com',
+        'HOST': 'mysql.ckmu3sjqklp5.ap-southeast-1.rds.amazonaws.com',
         'PORT': 3306
     }
 }
