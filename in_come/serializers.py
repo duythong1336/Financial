@@ -4,6 +4,7 @@ from in_come.models import Income
 from django.core.validators import MinValueValidator
 from wallet.models import Wallet
 from income_wallet.models import IncomeWallet
+from django.utils.timezone import now
 class InComeItemSerializer(serializers.Serializer):
     name = serializers.CharField(required = True)
     description = serializers.CharField(required = True)
@@ -43,7 +44,7 @@ class CreateIncomeSerializer(serializers.Serializer):
 class ListIncomeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Income
-        fields = ['id', 'name', 'description', 'price']
+        fields = ['id', 'name', 'description', 'price','date']
         extra_kwargs = {
             'name': {'required': False},
             'description': {'required': False},
@@ -61,8 +62,9 @@ class IncomeToWalletItem(serializers.Serializer):
         ],
         required = True
     )
+    date = serializers.DateField(required = False, default = now)
     class Meta:
-        fields = ['wallet', 'name','description','price']
+        fields = ['wallet', 'name','description','price','date']
 
 class AddIncomeToWalletSerializer(serializers.Serializer):
     items = serializers.ListField(

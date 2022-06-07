@@ -2,6 +2,7 @@ from django.db import models
 from shared.models import BaseModel, SoftDeleteModel
 from django.core.validators import MinValueValidator
 from user.models import User
+from django.utils.timezone import now
 # Create your models here.
 
 class Income(BaseModel, SoftDeleteModel):
@@ -20,3 +21,4 @@ class Income(BaseModel, SoftDeleteModel):
         on_delete=models.CASCADE,
         related_name='incomes'
     )
+    date = models.DateField(default =now, null = True)
