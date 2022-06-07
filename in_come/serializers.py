@@ -15,9 +15,10 @@ class InComeItemSerializer(serializers.Serializer):
             MinValueValidator(0.00)
         ],
         required = True
-    ) 
+    )
+    date = serializers.DateField(required = True)
     class Meta:
-        fields = ['name', 'description', 'price']
+        fields = ['name', 'description', 'price', 'date']
         
 class CreateIncomeSerializer(serializers.Serializer):
     items = serializers.ListField(
@@ -31,6 +32,7 @@ class CreateIncomeSerializer(serializers.Serializer):
                 name = item.get('name'),
                 description = item.get('description'),
                 price = item.get('price'),
+                date = item.get('date'),
                 user = self.context['request'].user
             )
             incomes.append(income)
@@ -48,7 +50,8 @@ class ListIncomeSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'name': {'required': False},
             'description': {'required': False},
-            'price': {'required':False}
+            'price': {'required':False},
+            'date': {'required':False}
         }
 class IncomeToWalletItem(serializers.Serializer):
     wallet = serializers.IntegerField(required = True)
@@ -83,7 +86,8 @@ class AddIncomeToWalletSerializer(serializers.Serializer):
                 name = item.get('name'),
                 description = item.get('description'),
                 price = item.get('price'),
-                user = self.context['request'].user
+                user = self.context['request'].user,
+                date = item.get('date'),
             )
             income.save()
             incomeWallet = IncomeWallet(

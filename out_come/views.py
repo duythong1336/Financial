@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from out_come.models import OutCome
-from shared.utils import response_data
+from shared.utils import response_data, format_str_to_date_v2
 from shared.messages import ResponseMessage
 from out_come.serializers import CreateOutComeSerializer,ListOutComeSerializer
 # Create your views here.
@@ -27,7 +27,21 @@ class CreateAndListOutComeView(generics.ListCreateAPIView):
         return Response(response, status=response.get('statusCode'))
 
     def list(self, request, *args, **kwargs):
-        queryset = OutCome.objects.filter(user = request.user)
+        from django.db.models import Q
+        from datetime import datetime
+        query = Q()
+
+        fromDateStr = request.query_params.get('fromDate')
+        if fromDateStr is not None:
+            fromDate = format_str_to_date_v2(fromDateStr)
+            query.add(Q(date__gte = fromDate), Q.AND)
+        
+        toDateStr = request.query_params.get('toDate', str(datetime.today().date()))
+        if toDateStr is not None:
+            toDate = format_str_to_date_v2(toDateStr)
+            query.add(Q(date__lte = toDate), Q.AND)
+        query.add(Q(user = request.user), Q.AND)
+        queryset = OutCome.objects.filter(query)
         if len(queryset) > 0:
             serializer = ListOutComeSerializer(queryset, many = True)
             response = response_data(

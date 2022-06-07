@@ -3,7 +3,7 @@ from django.shortcuts import render
 from rest_framework import generics, status
 from rest_framework.response import Response
 from in_come.models import Income
-from shared.utils import response_data
+from shared.utils import response_data, format_str_to_date_v2
 from shared.messages import ResponseMessage
 from in_come.serializers import CreateIncomeSerializer,ListIncomeSerializer,AddIncomeToWalletSerializer
 # Create your views here.
@@ -29,10 +29,20 @@ class CreateAndListIncomeView(generics.ListCreateAPIView):
 
     def list(self, request, *args, **kwargs):
         from django.db.models import Q
+        from datetime import datetime
         query = Q()
-        
-        queryset = Income.objects.filter(user = request.user)
 
+        fromDateStr = request.query_params.get('fromDate')
+        if fromDateStr is not None:
+            fromDate = format_str_to_date_v2(fromDateStr)
+            query.add(Q(date__gte = fromDate), Q.AND)
+        
+        toDateStr = request.query_params.get('toDate', str(datetime.today().date()))
+        if toDateStr is not None:
+            toDate = format_str_to_date_v2(toDateStr)
+            query.add(Q(date__lte = toDate), Q.AND)
+        query.add(Q(user = request.user), Q.AND)
+        queryset = Income.objects.filter(query)
         if len(queryset) > 0:
             serializer = ListIncomeSerializer(queryset, many = True)
             response = response_data(

@@ -104,3 +104,18 @@ def age(birthdate):
     today = date.today()
     age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
     return age
+
+def format_str_to_date_v2(str_date):
+    """
+    Validate date format of string
+    
+    Return: string with date format
+    """
+    from datetime import datetime
+    format = f"%Y-%m-%d"
+    try:
+        date = datetime.strptime(str_date, format)
+        return date
+    except Exception as ex:
+        print(ex)
+        raise exceptions.ValidationError({'date': ['Invalid format. Format: yyyy-MM-dd']})
