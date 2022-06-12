@@ -4,7 +4,7 @@ from rest_framework import exceptions
 from django.utils import timezone
 import smtplib, os
 from django.core.mail import EmailMessage
-
+import threading
 
 def get_user_by_email(email):
         try:
@@ -119,3 +119,49 @@ def format_str_to_date_v2(str_date):
     except Exception as ex:
         print(ex)
         raise exceptions.ValidationError({'date': ['Invalid format. Format: yyyy-MM-dd']})
+
+class EmailThread(threading.Thread):
+    def __init__(self, subject, body, to):
+        self.subject = subject
+        self.body = body
+        self.to = to
+        threading.Thread.__init__(self)
+
+    def run (self):
+        msg = EmailMessage(
+            subject=self.subject, 
+            body=self.body, 
+            from_email=os.environ.get('EMAIL_HOST_USER'), 
+            to=self.to, 
+            reply_to=[os.environ.get('EMAIL_HOST_USER')]
+        )
+        msg.content_subtype = "html"
+        try:
+            msg.send(fail_silently=False)
+        except Exception as e:
+            raise exceptions.APIException({'error': str(e)})
+
+class EmailThread(threading.Thread):
+    
+    def __init__(self, subject, body, to):
+        self.subject = subject
+        self.body = body
+        self.to = to
+        threading.Thread.__init__(self)
+
+    def run (self):
+        msg = EmailMessage(
+            subject=self.subject, 
+            body=self.body, 
+            from_email=os.environ.get('EMAIL_HOST_USER'), 
+            to=self.to, 
+            reply_to=[os.environ.get('EMAIL_HOST_USER')]
+        )
+        msg.content_subtype = "html"
+        try:
+            msg.send(fail_silently=False)
+        except Exception as e:
+            raise exceptions.APIException({'error': str(e)})
+
+def send_html_mail(subject, body, to):
+    EmailThread(subject, body, to).start()

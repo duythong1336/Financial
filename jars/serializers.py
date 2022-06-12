@@ -7,6 +7,23 @@ class JarsSerializer(serializers.ModelSerializer):
         model = Jar
         fields = ['id', 'name', 'percent']
 
+class RetrieveJarSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        outcomes = instance.outcomes.all()
+        print(outcomes)
+        data = []
+        for item in list(outcomes):
+            temp_dict = {}
+            temp_dict['id'] = item.outcome.id
+            temp_dict['name'] = item.outcome.name
+            temp_dict['price'] = item.outcome.price
+            temp_dict['description'] = item.outcome.description
+            data.append(temp_dict)
+        return{
+            'jarId': instance.id,
+            'jarName': instance.name,
+            'outcomes': data
+        }
 class AddOutcomesToJar(serializers.Serializer):
     outcomes = serializers.ListSerializer(
         child = serializers.IntegerField()
@@ -43,4 +60,23 @@ class OutComeInJar(serializers.BaseSerializer):
             "outcomeName": outcome.name,
             "outcomeDescription": outcome.description
         }
+
+class ItemUpdateJarSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    percent = serializers.IntegerField()
+    class Meta:
+        fields = ['id', 'percent']
+
+class UpdateJarSerializer(serializers.Serializer):
+    items = serializers.ListSerializer(
+        child = ItemUpdateJarSerializer()
+    )
+    class Meta:
+        fields = ['items']
+    def save(self):
+        jars = self.validated_data.get('items', None)
+        for item in jars:
+            jar = Jar.objects.get(id = item.get('id'))
+            jar.percent = item.get('percent')
+            jar.save(update_fields=['percent'])
 

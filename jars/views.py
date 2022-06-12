@@ -3,7 +3,7 @@ from rest_framework import generics, status, exceptions
 from jars_outcome.models import JarOutcome
 from shared.utils import response_data
 from jars.models import Jar
-from jars.serializers import JarsSerializer, AddOutcomesToJar,OutComeInJar
+from jars.serializers import JarsSerializer, AddOutcomesToJar,OutComeInJar,RetrieveJarSerializer,UpdateJarSerializer
 from shared.messages import ResponseMessage
 from rest_framework.response import Response
 from out_come.models import OutCome
@@ -38,7 +38,7 @@ class GetUpdateJarsView(generics.RetrieveUpdateAPIView):
             queryset = Jar.objects.get(pk = pk, user = request.user)
         except:
             raise exceptions.NotFound({ 'errors': [f'Not found salon Branch with id {pk}'] })
-        serializer = JarsSerializer(queryset)
+        serializer = RetrieveJarSerializer(queryset)
         outcomes = OutCome.objects.filter(jars__jar = queryset)
         price = 0
         for item in list(outcomes):
@@ -52,6 +52,25 @@ class GetUpdateJarsView(generics.RetrieveUpdateAPIView):
             message = ResponseMessage.GET_SUCCESS_MESSAGE,
             data = data
         )
+        return Response(response, status = response.get('statusCode'))
+    
+class UpdateJarsView(generics.UpdateAPIView):
+    def update(self, request, *args, **kwargs):
+        serializer = UpdateJarSerializer(data = request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            response = response_data(
+                success = True,
+                statusCode = status.HTTP_202_ACCEPTED,
+                message = ResponseMessage.UPDATE_SUCCESS_MESSAGE,
+            )
+        else:
+            response = response_data(
+                success= False,
+                statusCode = status.HTTP_400_BAD_REQUEST,
+                message = ResponseMessage.UPDATE_FAILURE_MESSAGE,
+                data = serializer.errors
+            )
         return Response(response, status = response.get('statusCode'))
 
 class AddOutcomeToJar(generics.ListCreateAPIView):

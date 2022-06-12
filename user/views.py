@@ -3,7 +3,7 @@ from user.serializers import CreateUserSerializer, EmailSerializer,RecoverPasswo
 from django.db import transaction, utils
 from rest_framework import generics, permissions, status, exceptions
 from rest_framework.response import Response
-from shared.utils import response_data, get_user_by_email, send_mail, age, generate_user_token
+from shared.utils import response_data, get_user_by_email, send_mail, age, generate_user_token,send_html_mail
 from user.models import UserToken
 from jars.models import JarChoice, Jar
 from django.utils import timezone
@@ -29,20 +29,19 @@ class CreateUserView(generics.CreateAPIView):
         user_token = UserToken.objects.filter(user = user).values('verifyCode').order_by('-id').first()
         subject = 'Welcome to Financial Management'
         body = '<p>Below is verification code of your account.</p><h4>' + user_token['verifyCode'] + '</h4>'
-        to_email = user.email
+        to = user.email
         
-        email_data = { 'subject': subject, 'body': body, 'to_email': to_email }
-
-        try:
-            send_mail(email_data)
-        except exceptions.APIException as e:
-            response = response_data(
-                success = False,
-                statusCode = status.HTTP_503_SERVICE_UNAVAILABLE,
-                message = 'Error while sending email',
-                data = e.detail
-            )
-            return Response(response, response.get('statusCode'))
+        send_html_mail(subject, body, to)
+        # try:
+        #     send_mail(email_data)
+        # except exceptions.APIException as e:
+        #     response = response_data(
+        #         success = False,
+        #         statusCode = status.HTTP_503_SERVICE_UNAVAILABLE,
+        #         message = 'Error while sending email',
+        #         data = e.detail
+        #     )
+        #     return Response(response, response.get('statusCode'))
                 
         response = response_data(
             success = True,
@@ -187,11 +186,14 @@ class CheckEmailForgotPassword(generics.UpdateAPIView):
             token = user_token.verifyCode
         else:
             token = generate_user_token(user)
-        email_data = {}
-        email_data['subject']= "Reset Password"
-        email_data['body'] = f"Your verify code is {token}"
-        email_data['to_email'] = user.email
-        send_mail(email_data)
+        # email_data = {}
+        # email_data['subject']= "Reset Password"
+        # email_data['body'] = f"Your verify code is {token}"
+        # email_data['to_email'] = user.email
+        subject = 'Reset Password'
+        body = 'Your verify code is {token}'
+        to = user.email
+        send_html_mail(subject, body, to)
         response = response_data(
             success = True,
             statusCode = status.HTTP_200_OK,

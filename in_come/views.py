@@ -143,3 +143,30 @@ class CreateIncomeAndAddToWallet(generics.CreateAPIView):
             )
 
         return Response(response, status = response.get('statusCode'))
+
+class TotalIncomesPricesView(generics.RetrieveAPIView):
+    def get(self, request, *args, **kwargs):
+        incomes = Income.objects.filter(user = request.user, isDeleted = False)
+        total = 0
+        data = {}
+        
+        if len(incomes) > 0:
+            for item in list(incomes):
+                total += item.price
+            data['total'] = total
+            response = response_data(
+                success = True,
+                statusCode = status.HTTP_200_OK,
+                message = ResponseMessage.GET_SUCCESS_MESSAGE,
+                data = data
+            )
+        else:
+            total = 0
+            data = ['total']
+            response = response_data(
+                success = True,
+                statusCode = status.HTTP_200_OK,
+                message = ResponseMessage.GET_SUCCESS_MESSAGE,
+                data = data
+            )
+        return Response(response, status = response.get('statusCode'))

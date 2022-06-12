@@ -66,7 +66,8 @@ class GetDetailUpdateWalletView(generics.RetrieveUpdateAPIView):
             for item in list(incomes):
                 price += item.price
             data['price'] = price
-        
+        else:
+            data['price'] = 0
         response = response_data(
             success=True,
             statusCode=status.HTTP_200_OK,
