@@ -18,6 +18,7 @@ class RetrieveJarSerializer(serializers.BaseSerializer):
             temp_dict['name'] = item.outcome.name
             temp_dict['price'] = item.outcome.price
             temp_dict['description'] = item.outcome.description
+            temp_dict['date'] = item.outcome.date
             data.append(temp_dict)
         return{
             'jarId': instance.id,
