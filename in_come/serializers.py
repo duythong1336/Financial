@@ -53,6 +53,27 @@ class ListIncomeSerializer(serializers.ModelSerializer):
             'price': {'required':False},
             'date': {'required':False}
         }
+class ListIncomeWithWalletSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        temp_dict = {}
+        try:
+            wallet = instance.wallets.all().first()
+            temp_dict['walletId'] = wallet.id
+            temp_dict['id'] = instance.id
+            temp_dict['name'] = instance.name
+            temp_dict['description'] = instance.description
+            temp_dict['price'] = instance.price
+            temp_dict['date'] = instance.date
+        except: 
+            temp_dict['id'] = instance.id
+            temp_dict['name'] = instance.name
+            temp_dict['description'] = instance.description
+            temp_dict['price'] = instance.price
+            temp_dict['date'] = instance.date
+        
+        return temp_dict
+
+
 class IncomeToWalletItem(serializers.Serializer):
     wallet = serializers.IntegerField(required = True)
     name = serializers.CharField(required = True, max_length = 255)

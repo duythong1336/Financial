@@ -7,10 +7,26 @@ class JarsSerializer(serializers.ModelSerializer):
         model = Jar
         fields = ['id', 'name', 'percent']
 
+class JarAndPriceSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        price = 0
+        temp_dict = {}
+        outcomes = instance.outcomes.filter(jar = instance)
+        if len(outcomes) > 0:
+            for outcome in list(outcomes):
+                price += outcome.outcome.price
+        else:
+            price = 0
+        temp_dict['id'] = instance.id
+        temp_dict['name'] = instance.name
+        temp_dict['percent'] = instance.percent
+        temp_dict['price'] = price
+        
+        return temp_dict
+        
 class RetrieveJarSerializer(serializers.BaseSerializer):
     def to_representation(self, instance):
         outcomes = instance.outcomes.all()
-        print(outcomes)
         data = []
         for item in list(outcomes):
             temp_dict = {}

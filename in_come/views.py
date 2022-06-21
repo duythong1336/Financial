@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from in_come.models import Income
 from shared.utils import response_data, format_str_to_date_v2
 from shared.messages import ResponseMessage
-from in_come.serializers import CreateIncomeSerializer,ListIncomeSerializer,AddIncomeToWalletSerializer
+from in_come.serializers import CreateIncomeSerializer,ListIncomeSerializer,AddIncomeToWalletSerializer,ListIncomeWithWalletSerializer
 # Create your views here.
 class CreateAndListIncomeView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
@@ -44,7 +44,7 @@ class CreateAndListIncomeView(generics.ListCreateAPIView):
         query.add(Q(user = request.user), Q.AND)
         queryset = Income.objects.filter(query)
         if len(queryset) > 0:
-            serializer = ListIncomeSerializer(queryset, many = True)
+            serializer = ListIncomeWithWalletSerializer(queryset, many = True)
             response = response_data(
                 success = True,
                 statusCode=status.HTTP_200_OK,
@@ -170,3 +170,5 @@ class TotalIncomesPricesView(generics.RetrieveAPIView):
                 data = data
             )
         return Response(response, status = response.get('statusCode'))
+
+

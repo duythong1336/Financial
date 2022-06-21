@@ -3,7 +3,7 @@ from django.shortcuts import render
 from rest_framework import generics, status, exceptions
 from shared.utils import response_data
 from shared.messages import ResponseMessage
-from wallet.serializers import CreateWalletSerializer,WalletSerialzier,IncomeInWalletSerializer,AddIncomeToWalletSerializer
+from wallet.serializers import CreateWalletSerializer,WalletSerialzier,IncomeInWalletSerializer,AddIncomeToWalletSerializer,WalletWithPriceSerializer
 from rest_framework.response import Response
 from wallet.models import Wallet
 from income_wallet.models import IncomeWallet
@@ -36,7 +36,7 @@ class CreateGetWalletFollowUserView(generics.ListCreateAPIView):
             user = user
         )
         if len(queryset) > 0:
-            serializer = WalletSerialzier(queryset, many = True)
+            serializer = WalletWithPriceSerializer(queryset, many = True)
             response = response_data(
                 success= True,
                 statusCode=status.HTTP_200_OK,

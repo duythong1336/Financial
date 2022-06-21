@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from out_come.models import OutCome
 from shared.utils import response_data, format_str_to_date_v2
 from shared.messages import ResponseMessage
-from out_come.serializers import CreateOutComeSerializer,ListOutComeSerializer
+from out_come.serializers import CreateOutComeSerializer,ListOutComeSerializer,OutComeWithJarSerializer
 # Create your views here.
 class CreateAndListOutComeView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
@@ -43,7 +43,7 @@ class CreateAndListOutComeView(generics.ListCreateAPIView):
         query.add(Q(user = request.user), Q.AND)
         queryset = OutCome.objects.filter(query)
         if len(queryset) > 0:
-            serializer = ListOutComeSerializer(queryset, many = True)
+            serializer = OutComeWithJarSerializer(queryset, many = True)
             response = response_data(
                 success = True,
                 statusCode=status.HTTP_200_OK,

@@ -52,3 +52,20 @@ class ListOutComeSerializer(serializers.ModelSerializer):
             'date': {'required': False},
         }
     
+class OutComeWithJarSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        temp_dict = {}
+        try:
+            jar = instance.jars.all().first()
+            temp_dict['jarId'] = jar.id
+            temp_dict['id'] = instance.id
+            temp_dict['name'] = instance.name
+            temp_dict['description'] = instance.description
+            temp_dict['price'] = instance.price
+            temp_dict['date'] = instance.date
+        except:
+            temp_dict['id'] = instance.id
+            temp_dict['name'] = instance.name
+            temp_dict['description'] = instance.description
+            temp_dict['price'] = instance.price
+        return temp_dict

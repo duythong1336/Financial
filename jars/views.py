@@ -3,7 +3,7 @@ from rest_framework import generics, status, exceptions
 from jars_outcome.models import JarOutcome
 from shared.utils import response_data
 from jars.models import Jar
-from jars.serializers import JarsSerializer, AddOutcomesToJar,OutComeInJar,RetrieveJarSerializer,UpdateJarSerializer
+from jars.serializers import JarsSerializer, AddOutcomesToJar,OutComeInJar,RetrieveJarSerializer,UpdateJarSerializer,JarAndPriceSerializer
 from shared.messages import ResponseMessage
 from rest_framework.response import Response
 from out_come.models import OutCome
@@ -14,7 +14,7 @@ class GetJarsFollowUserView(generics.ListAPIView):
         user = request.user
         queryset = Jar.objects.filter(user = user)
         if len(queryset) > 0:
-            serializer = JarsSerializer(queryset, many = True)
+            serializer = JarAndPriceSerializer(queryset, many = True)
             response = response_data(
                 success= True,
                 statusCode= status.HTTP_200_OK,
@@ -81,7 +81,6 @@ class AddOutcomeToJar(generics.ListCreateAPIView):
         except:
             raise exceptions.NotFound({'errors': [f'Not found Jar with id {jar_id}']})
         data = request.data
-        print(data)
         serializer = AddOutcomesToJar(data = request.data, context = {'request': request, 'jar': jar})
         if serializer.is_valid(raise_exception=True):
             serializer.save()

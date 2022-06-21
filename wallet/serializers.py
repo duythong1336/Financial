@@ -55,7 +55,21 @@ class WalletSerialzier(serializers.ModelSerializer):
             'description': {'required': False},
             'price': {'required': False}
         }
-
+class WalletWithPriceSerializer(serializers.BaseSerializer):
+    def to_representation(self, instance):
+        price = 0
+        temp_dict = {}
+        incomes = instance.incomes.filter(wallet = instance)
+        if len(incomes) > 0:
+            for item in list(incomes):
+                price += item.income.price
+        else:
+            price = 0
+        temp_dict['id'] = instance.id
+        temp_dict['name'] = instance.name
+        temp_dict['description'] = instance.description
+        temp_dict['price'] = price
+        return temp_dict
 class AddIncomeToWalletSerializer(serializers.Serializer):
     incomes = serializers.ListSerializer(
         child = serializers.IntegerField()
