@@ -3,6 +3,7 @@ from rest_framework import serializers
 from out_come.models import OutCome
 from django.core.validators import MinValueValidator
 from django.utils.timezone import now
+from jars_outcome.models import JarOutcome
 class OutComeItemSerializer(serializers.Serializer):
     name = serializers.CharField(required = True)
     description = serializers.CharField(required = True)
@@ -57,15 +58,38 @@ class OutComeWithJarSerializer(serializers.BaseSerializer):
         temp_dict = {}
         try:
             jar = instance.jars.all().first()
-            temp_dict['jarId'] = jar.id
+            temp_dict['jarId'] = jar.jar.id
+            temp_dict['jarName'] = jar.jar.name
             temp_dict['id'] = instance.id
             temp_dict['name'] = instance.name
             temp_dict['description'] = instance.description
             temp_dict['price'] = instance.price
-            temp_dict['date'] = instance.date
+            temp_dict['date'] = instance.date     
         except:
             temp_dict['id'] = instance.id
             temp_dict['name'] = instance.name
             temp_dict['description'] = instance.description
             temp_dict['price'] = instance.price
+            temp_dict['date'] = instance.date
         return temp_dict
+
+class UpdateJarForOutComeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JarOutcome
+        fields = ['jar', 'outcome']
+    
+    def update(self):
+        jar = self.validated_data.get('jar')
+        outcome = self.validated_data.get('outcome')
+        try:
+            jaroutcome = JarOutcome.objects.get(outcome = outcome)
+            jaroutcome.jar = jar
+            print(jaroutcome)
+            jaroutcome.save(update_fields = ['jar'])
+        except:
+            item = JarOutcome(
+                jar = jar,
+                outcome = outcome,
+                price = outcome.price
+            )
+            item.save()

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from out_come.models import OutCome
 from shared.utils import response_data, format_str_to_date_v2
 from shared.messages import ResponseMessage
-from out_come.serializers import CreateOutComeSerializer,ListOutComeSerializer,OutComeWithJarSerializer
+from out_come.serializers import CreateOutComeSerializer,ListOutComeSerializer,OutComeWithJarSerializer,UpdateJarForOutComeSerializer
 # Create your views here.
 class CreateAndListOutComeView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
@@ -106,14 +106,33 @@ class GetlistOutcomeEnableAddtoJar(generics.ListAPIView):
             response = response_data(
                 success = True,
                 statusCode = status.HTTP_200_OK,
-                message = ResponseMessage.UPDATE_SUCCESS_MESSAGE,
+                message = ResponseMessage.GET_SUCCESS_MESSAGE,
                 data = serializer.data
             )
         else:
+            response = response_data(
+                success = False,
+                statusCode = status.HTTP_400_BAD_REQUEST,
+                message = ResponseMessage.GET_FAILURE_MESSAGE,
+                data = []
+            )
+        return Response(response, status = response.get('statusCode'))
+
+class UpdateJarForOutComeView(generics.UpdateAPIView):
+    def put(self, request, *args, **kwargs):
+        serializer = UpdateJarForOutComeSerializer(data = request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.update()
             response = response_data(
                 success = True,
                 statusCode = status.HTTP_200_OK,
                 message = ResponseMessage.UPDATE_SUCCESS_MESSAGE,
                 data = serializer.data
+            )
+        else:
+            response = response_data(
+                success = False,
+                statusCode = status.HTTP_400_BAD_REQUEST,
+                message = ResponseMessage.UPDATE_FAILURE_MESSAGE
             )
         return Response(response, status = response.get('statusCode'))

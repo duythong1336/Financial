@@ -58,7 +58,8 @@ class ListIncomeWithWalletSerializer(serializers.ModelSerializer):
         temp_dict = {}
         try:
             wallet = instance.wallets.all().first()
-            temp_dict['walletId'] = wallet.id
+            temp_dict['walletId'] = wallet.wallet.id
+            temp_dict['walletName'] = wallet.wallet.name
             temp_dict['id'] = instance.id
             temp_dict['name'] = instance.name
             temp_dict['description'] = instance.description
