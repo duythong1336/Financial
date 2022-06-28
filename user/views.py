@@ -29,7 +29,7 @@ class CreateUserView(generics.CreateAPIView):
         user_token = UserToken.objects.filter(user = user).values('verifyCode').order_by('-id').first()
         subject = 'Welcome to Financial Management'
         body = '<p>Below is verification code of your account.</p><h4>' + user_token['verifyCode'] + '</h4>'
-        to = user.email
+        to = [user.email]
         
         send_html_mail(subject, body, to)
         # try:
@@ -117,7 +117,6 @@ class VerifyEmailView(generics.UpdateAPIView):
         if user is None:
             raise exceptions.NotFound()
         dob = user.dob
-        print(age(dob))
         user_token = UserToken.objects.filter(user = user).order_by('-id').first()
         # if user_token is None:
         #     return Response(data = 'Not found user', status = status.HTTP_404_NOT_FOUND)
@@ -191,8 +190,8 @@ class CheckEmailForgotPassword(generics.UpdateAPIView):
         # email_data['body'] = f"Your verify code is {token}"
         # email_data['to_email'] = user.email
         subject = 'Reset Password'
-        body = 'Your verify code is {token}'
-        to = user.email
+        body = f'Your verify code is {token}'
+        to = [user.email]
         send_html_mail(subject, body, to)
         response = response_data(
             success = True,
