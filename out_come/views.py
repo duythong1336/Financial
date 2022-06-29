@@ -11,12 +11,14 @@ class CreateAndListOutComeView(generics.ListCreateAPIView):
         data = request.data
         serializer = CreateOutComeSerializer(data = data, context = {'request': request})
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            outcome = serializer.save()
+            data = serializer.data
+            data['id '] = outcome.id
             response = response_data(
             success = True,
             statusCode=status.HTTP_201_CREATED,
             message=ResponseMessage.CREATE_SUCCESS_MESSAGE,
-            data = serializer.data
+            data = data
         )
         else:
             response = response_data(

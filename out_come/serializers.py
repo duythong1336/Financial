@@ -1,4 +1,6 @@
 from asyncio.format_helpers import extract_stack
+from asyncore import read
+from logging.config import valid_ident
 from rest_framework import serializers
 from out_come.models import OutCome
 from django.core.validators import MinValueValidator
@@ -16,32 +18,28 @@ class OutComeItemSerializer(serializers.Serializer):
         required = True
     )
     date = serializers.DateField(required = False, default = now )
+    id = serializers.IntegerField(required = False, read_only = True)
     class Meta:
-        fields = ['name', 'description', 'price','date']
+        fields = ['name', 'description', 'price','date', 'id']
         
-class CreateOutComeSerializer(serializers.Serializer):
-    items = serializers.ListField(
-        child = OutComeItemSerializer()
-    )
+class CreateOutComeSerializer(serializers.ModelSerializer):
     def save(self):
-        outcomes = []
-        items = self.validated_data['items']
-        for item in items:
-            outcome = OutCome(
-                name = item.get('name'),
-                description = item.get('description'),
-                price = item.get('price'),
-                user = self.context['request'].user,
-                date = item.get('date')
-            )
-            outcomes.append(outcome)
+        
+        outcome = OutCome(
+            name = self.validated_data['name'],
+            description = self.validated_data['description'],
+            price = self.validated_data['price'],
+            user = self.context['request'].user,
+            date = self.validated_data['date'],
+        )
+        
             
-        OutCome.objects.bulk_create(outcomes)
-        return outcomes
+        outcome.save()
+        return outcome
 
     class Meta:
         model = OutCome
-        fields = ['items']
+        fields = ['id', 'name', 'description', 'price', 'date']
 class ListOutComeSerializer(serializers.ModelSerializer):
     class Meta:
         model = OutCome
