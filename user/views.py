@@ -7,6 +7,7 @@ from shared.utils import response_data, get_user_by_email, send_mail, age, gener
 from user.models import UserToken
 from jars.models import JarChoice, Jar
 from django.utils import timezone
+from shared.templates.emailSender import templateRegister,templateRetrievePassword
 # Create your views here.
 class CreateUserView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
@@ -28,7 +29,7 @@ class CreateUserView(generics.CreateAPIView):
         #set up mail
         user_token = UserToken.objects.filter(user = user).values('verifyCode').order_by('-id').first()
         subject = 'Welcome to Financial Management'
-        body = '<p>Below is verification code of your account.</p><h4>' + user_token['verifyCode'] + '</h4>'
+        body =templateRegister(user_token['verifyCode'])
         to = [user.email]
         
         send_html_mail(subject, body, to)
@@ -190,7 +191,7 @@ class CheckEmailForgotPassword(generics.UpdateAPIView):
         # email_data['body'] = f"Your verify code is {token}"
         # email_data['to_email'] = user.email
         subject = 'Reset Password'
-        body = f'Your verify code is {token}'
+        body = templateRetrievePassword(token)
         to = [user.email]
         send_html_mail(subject, body, to)
         response = response_data(

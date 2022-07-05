@@ -20,8 +20,8 @@ def generate_user_token(user, timedelta = 15):
         Expired time delta 15 minutes by default
     """
     user_token = UserToken(
-            # verifyCode = generate_verify_code(),
-            verifyCode = '123456', # bypass for dev
+            verifyCode = generate_verify_code(),
+            # verifyCode = '123456', # bypass for dev
             expiredAt = timezone.now() + timezone.timedelta(minutes = int(os.environ.get('EXPIRY_INTERVAL', timedelta))),
             user = user,
         )
