@@ -105,5 +105,7 @@ class IncomeInWalletSerializer(serializers.BaseSerializer):
             "walletId": instance.wallet.id,
             "incomeId": income.id,
             "incomeName": income.name,
+            'incomePrice': income.price,
+            'incomeDate': income.date,
             "incomeDescription": income.description
         }

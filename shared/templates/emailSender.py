@@ -197,8 +197,8 @@ def templateRegister(code):
                       <td style="padding-bottom: 10px">
                         <img
                           style="max-width: 120px; margin-left: 160px"
-                          src="https://develop-bizbookly.s3.ap-southeast-1.amazonaws.com/images/2022/7/5/Vector.png"
-                          alt="BIZBOOKLY"
+                          src="https://develop-bizbookly.s3.ap-southeast-1.amazonaws.com/images/2022/7/5/Frame+6938.png"
+                          alt="FINANCIAL"
                         />
                         <!-- <span
                           style="
@@ -510,7 +510,7 @@ def templateRetrievePassword(code):
                       <td style="padding-bottom: 10px">
                         <img
                           style="max-width: 120px; margin-left: 160px"
-                          src="https://develop-bizbookly.s3.ap-southeast-1.amazonaws.com/images/2022/7/5/Vector.png"
+                          src="https://develop-bizbookly.s3.ap-southeast-1.amazonaws.com/images/2022/7/5/Frame+6938.png"
                           alt="FINANCIAL"
                         />
                       </td>
