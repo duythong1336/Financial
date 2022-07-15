@@ -13,7 +13,7 @@ class CreateAndListOutComeView(generics.ListCreateAPIView):
         if serializer.is_valid(raise_exception=True):
             outcome = serializer.save()
             data = serializer.data
-            data['id '] = outcome.id
+            data['id'] = outcome.id
             response = response_data(
             success = True,
             statusCode=status.HTTP_201_CREATED,
